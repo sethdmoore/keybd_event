@@ -102,37 +102,37 @@ func getFileUInput() (string, error) {
 func (k *KeyBonding) Launching() error {
 
 	if k.hasALT {
-		err := downKey(_VK_ALT)
+		err := DownKey(_VK_ALT)
 		if err != nil {
 			return err
 		}
 	}
 	if k.hasSHIFT {
-		err := downKey(_VK_SHIFT)
+		err := DownKey(_VK_SHIFT)
 		if err != nil {
 			return err
 		}
 	}
 	if k.hasCTRL {
-		err := downKey(_VK_CTRL)
+		err := DownKey(_VK_CTRL)
 		if err != nil {
 			return err
 		}
 	}
 	if k.hasRSHIFT {
-		err := downKey(_VK_RIGHTSHIFT)
+		err := DownKey(_VK_RIGHTSHIFT)
 		if err != nil {
 			return err
 		}
 	}
 	if k.hasRCTRL {
-		err := downKey(_VK_RIGHTCTRL)
+		err := DownKey(_VK_RIGHTCTRL)
 		if err != nil {
 			return err
 		}
 	}
 	for _, key := range k.keys {
-		err := downKey(key)
+		err := DownKey(key)
 		if err != nil {
 			return err
 		}
@@ -195,7 +195,7 @@ func keyEventSet() error {
 	}
 	return nil
 }
-func downKey(key int) error {
+func DownKey(key int) error {
 	ev := input_event{}
 	ev._type = _EV_KEY
 	ev.code = C.__u16(key)

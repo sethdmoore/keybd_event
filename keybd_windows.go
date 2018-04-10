@@ -11,22 +11,22 @@ var procKeyBd = dll.NewProc("keybd_event")
 func (k *KeyBonding) Launching() error {
 	//key down
 	if k.hasALT {
-		downKey(_VK_ALT)
+		DownKey(_VK_ALT)
 	}
 	if k.hasSHIFT {
-		downKey(_VK_SHIFT)
+		DownKey(_VK_SHIFT)
 	}
 	if k.hasCTRL {
-		downKey(_VK_CTRL)
+		DownKey(_VK_CTRL)
 	}
 	if k.hasRSHIFT {
-		downKey(_VK_RSHIFT)
+		DownKey(_VK_RSHIFT)
 	}
 	if k.hasRCTRL {
-		downKey(_VK_RCONTROL)
+		DownKey(_VK_RCONTROL)
 	}
 	for _, key := range k.keys {
-		downKey(key)
+		DownKey(key)
 	}
 	//key up
 	if k.hasALT {
@@ -49,7 +49,7 @@ func (k *KeyBonding) Launching() error {
 	}
 	return nil
 }
-func downKey(key int) {
+func DownKey(key int) {
 	vkey := key + 0x80
 	procKeyBd.Call(uintptr(key), uintptr(vkey), 0, 0)
 }
