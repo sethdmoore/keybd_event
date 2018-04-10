@@ -186,6 +186,101 @@ func (k *KeyBonding) Launching() error {
 
 	return nil
 }
+
+// Hold keys down
+func (k *KeyBonding) PressKeys() error {
+
+	if k.hasALT {
+		err := DownKey(_VK_ALT)
+		if err != nil {
+			return err
+		}
+	}
+	if k.hasSHIFT {
+		err := DownKey(_VK_SHIFT)
+		if err != nil {
+			return err
+		}
+	}
+	if k.hasCTRL {
+		err := DownKey(_VK_CTRL)
+		if err != nil {
+			return err
+		}
+	}
+	if k.hasRSHIFT {
+		err := DownKey(_VK_RIGHTSHIFT)
+		if err != nil {
+			return err
+		}
+	}
+	if k.hasRCTRL {
+		err := DownKey(_VK_RIGHTCTRL)
+		if err != nil {
+			return err
+		}
+	}
+	for _, key := range k.keys {
+		err := DownKey(key)
+		if err != nil {
+			return err
+		}
+	}
+	err := sync()
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+// Release keys later
+func (k *KeyBonding) ReleaseKeys() error {
+	//key up
+	if k.hasALT {
+		err := upKey(_VK_ALT)
+		if err != nil {
+			return err
+		}
+	}
+	if k.hasSHIFT {
+		err := upKey(_VK_SHIFT)
+		if err != nil {
+			return err
+		}
+	}
+	if k.hasCTRL {
+		err = upKey(_VK_CTRL)
+		if err != nil {
+			return err
+		}
+	}
+	if k.hasRSHIFT {
+		err = upKey(_VK_RIGHTSHIFT)
+		if err != nil {
+			return err
+		}
+	}
+	if k.hasRCTRL {
+		err = upKey(_VK_RIGHTCTRL)
+		if err != nil {
+			return err
+		}
+	}
+	for _, key := range k.keys {
+		err = upKey(key)
+		if err != nil {
+			return err
+		}
+	}
+	err = sync()
+	if err != nil {
+		return err
+	}
+	//Destroy device
+
+	return nil
+}
+
 func keyEventSet() error {
 	for i := 0; i < 256; i++ {
 		_, _, errCall := syscall.Syscall(syscall.SYS_IOCTL, fd.Fd(), _UI_SET_KEYBIT, uintptr(i))
