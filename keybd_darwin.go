@@ -38,8 +38,8 @@ const (
 
 func initKeyBD() error { return nil }
 
-// Launch key bounding
-func (k *KeyBonding) Launching() error {
+// Launch key binding
+func (k *KeyBinding) Launching() error {
 
 	for _, key := range k.keys {
 		k.tapKey(key)
@@ -58,7 +58,7 @@ func alt(event C.CGEventRef) {
 func cmd(event C.CGEventRef) {
 	C.AddActionKey(_VK_CMD, event)
 }
-func (k KeyBonding) tapKey(key int) {
+func (k KeyBinding) tapKey(key int) {
 	event := C.Create(C.int(key))
 	if k.hasALT {
 		alt(event)

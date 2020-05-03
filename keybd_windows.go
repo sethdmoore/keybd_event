@@ -7,7 +7,7 @@ import (
 var dll = syscall.NewLazyDLL("user32.dll")
 var procKeyBd = dll.NewProc("keybd_event")
 
-// Launch key bounding
+// Launch key binding
 func (k *KeyBonding) Launching() error {
 	//key down
 	if k.hasALT {

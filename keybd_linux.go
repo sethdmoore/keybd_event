@@ -36,7 +36,7 @@ const (
 	_VK_ALT               = 56
 )
 
-func initKeyBD() error {
+func initKeyBD() (err error) {
 	if fd != nil {
 		return nil
 	}
@@ -46,12 +46,12 @@ func initKeyBD() error {
 	}
 	fdInit, err := os.OpenFile(path, os.O_WRONLY|syscall.O_NONBLOCK, os.ModeDevice)
 	fd = fdInit
+
 	if err != nil {
 		if os.IsPermission(err) {
 			return errors.New("permission error for " + path + " try cmd : sudo chmod +0666 " + path)
-		} else {
-			return err
 		}
+		return err
 	}
 	_, _, errCall := syscall.Syscall(syscall.SYS_IOCTL, fd.Fd(), _UI_SET_EVBIT, uintptr(_EV_KEY))
 	if errCall != 0 {
@@ -74,6 +74,7 @@ func initKeyBD() error {
 	if err != nil {
 		return err
 	}
+
 	//Create device
 	_, _, errCall = syscall.Syscall(syscall.SYS_IOCTL, fd.Fd(), _UI_DEV_CREATE, 0)
 	if errCall != 0 {
@@ -87,6 +88,7 @@ func destroyLinuxUInput() {
 	syscall.Syscall(syscall.SYS_IOCTL, fd.Fd(), _UI_DEV_DESTROY, 0)
 	fd.Close()
 }
+
 func getFileUInput() (string, error) {
 	if _, err := os.Stat("/dev/uinput"); err == nil {
 		return "/dev/uinput", nil
@@ -98,58 +100,59 @@ func getFileUInput() (string, error) {
 	return "", err
 }
 
-// Launch key bounding
-func (k *KeyBonding) Launching() error {
-
+// Launch key binding
+func (k *KeyBinding) Launching() (err error) {
 	if k.hasALT {
-		err := DownKey(_VK_ALT)
+		err = DownKey(_VK_ALT)
 		if err != nil {
 			return err
 		}
 	}
+
 	if k.hasSHIFT {
-		err := DownKey(_VK_SHIFT)
+		err = DownKey(_VK_SHIFT)
 		if err != nil {
 			return err
 		}
 	}
 	if k.hasCTRL {
-		err := DownKey(_VK_CTRL)
+		err = DownKey(_VK_CTRL)
 		if err != nil {
 			return err
 		}
 	}
 	if k.hasRSHIFT {
-		err := DownKey(_VK_RIGHTSHIFT)
+		err = DownKey(_VK_RIGHTSHIFT)
 		if err != nil {
 			return err
 		}
 	}
 	if k.hasRCTRL {
-		err := DownKey(_VK_RIGHTCTRL)
+		err = DownKey(_VK_RIGHTCTRL)
 		if err != nil {
 			return err
 		}
 	}
 	for _, key := range k.keys {
-		err := DownKey(key)
+		err = DownKey(key)
 		if err != nil {
 			return err
 		}
 	}
-	err := sync()
+	err = sync()
 	if err != nil {
 		return err
 	}
+
 	//key up
 	if k.hasALT {
-		err := upKey(_VK_ALT)
+		err = upKey(_VK_ALT)
 		if err != nil {
 			return err
 		}
 	}
 	if k.hasSHIFT {
-		err := upKey(_VK_SHIFT)
+		err = upKey(_VK_SHIFT)
 		if err != nil {
 			return err
 		}
@@ -182,68 +185,66 @@ func (k *KeyBonding) Launching() error {
 	if err != nil {
 		return err
 	}
-	//Destroy device
 
 	return nil
 }
 
 // Hold keys down
-func (k *KeyBonding) PressKeys() error {
+func (k *KeyBinding) PressKeys() (err error) {
 
 	if k.hasALT {
-		err := DownKey(_VK_ALT)
+		err = DownKey(_VK_ALT)
 		if err != nil {
 			return err
 		}
 	}
 	if k.hasSHIFT {
-		err := DownKey(_VK_SHIFT)
+		err = DownKey(_VK_SHIFT)
 		if err != nil {
 			return err
 		}
 	}
 	if k.hasCTRL {
-		err := DownKey(_VK_CTRL)
+		err = DownKey(_VK_CTRL)
 		if err != nil {
 			return err
 		}
 	}
 	if k.hasRSHIFT {
-		err := DownKey(_VK_RIGHTSHIFT)
+		err = DownKey(_VK_RIGHTSHIFT)
 		if err != nil {
 			return err
 		}
 	}
 	if k.hasRCTRL {
-		err := DownKey(_VK_RIGHTCTRL)
+		err = DownKey(_VK_RIGHTCTRL)
 		if err != nil {
 			return err
 		}
 	}
 	for _, key := range k.keys {
-		err := DownKey(key)
+		err = DownKey(key)
 		if err != nil {
 			return err
 		}
 	}
-	err := sync()
+	err = sync()
 	if err != nil {
 		return err
 	}
 	return nil
 }
 
-// Release keys later
-func (k *KeyBonding) ReleaseKeys() error {
-	//key up
+// ReleaseKeys releases held keys
+func (k *KeyBinding) ReleaseKeys() (err error) {
 	if k.hasALT {
-		err := upKey(_VK_ALT)
+		err = upKey(_VK_ALT)
 		if err != nil {
 			return err
 		}
 	}
 	if k.hasSHIFT {
-		err := upKey(_VK_SHIFT)
+		err = upKey(_VK_SHIFT)
 		if err != nil {
 			return err
 		}
@@ -276,12 +277,11 @@ func (k *KeyBonding) ReleaseKeys() error {
 	if err != nil {
 		return err
 	}
-	//Destroy device
 
 	return nil
 }
 
-func keyEventSet() error {
+func keyEventSet() (err error) {
 	for i := 0; i < 256; i++ {
 		_, _, errCall := syscall.Syscall(syscall.SYS_IOCTL, fd.Fd(), _UI_SET_KEYBIT, uintptr(i))
 		if errCall != 0 {
@@ -290,34 +290,37 @@ func keyEventSet() error {
 	}
 	return nil
 }
-func DownKey(key int) error {
+
+// DownKey holds the key down
+func DownKey(key int) (err error) {
 	ev := input_event{}
 	ev._type = _EV_KEY
 	ev.code = C.__u16(key)
 	ev.value = 1
-	err := binary.Write(fd, binary.LittleEndian, &ev)
+	err = binary.Write(fd, binary.LittleEndian, &ev)
 	if err != nil {
 		return err
 	}
 	return nil
 }
-func sync() error {
+
+func sync() (err error) {
 	ev := input_event{}
 	ev._type = _EV_SYN
 	ev.code = 0
 	ev.value = 0
-	err := binary.Write(fd, binary.LittleEndian, &ev)
+	err = binary.Write(fd, binary.LittleEndian, &ev)
 	if err != nil {
 		return err
 	}
 	return nil
 }
-func upKey(key int) error {
+func upKey(key int) (err error) {
 	ev := input_event{}
 	ev._type = _EV_KEY
 	ev.code = C.__u16(key)
 	ev.value = 0
-	err := binary.Write(fd, binary.LittleEndian, &ev)
+	err = binary.Write(fd, binary.LittleEndian, &ev)
 	if err != nil {
 		return err
 	}
